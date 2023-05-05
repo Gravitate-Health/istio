@@ -12,7 +12,7 @@ spec:
       protocol: HTTPS
     tls:
       mode: SIMPLE
-      credentialName: letsencrypt-cert
+      credentialName: fosps-url-cert
     hosts:
     - fosps.gravitatehealth.eu
   - port:      

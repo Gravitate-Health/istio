@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: gh-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:      
+      number: 80      
+      name: http      
+      protocol: HTTP    
+    hosts:    
+    - 85.215.199.205

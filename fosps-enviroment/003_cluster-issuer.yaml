@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-cert
+  namespace: istio-system
+spec:
+  acme:
+    email: aeolmo@lst.tfo.upm.es
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-cert
+    solvers:
+    - http01:
+        ingress:
+          class: istio

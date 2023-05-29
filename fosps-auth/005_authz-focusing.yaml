@@ -15,26 +15,39 @@
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata: 
-  name: jwt-default-namespace
+  name: auth-focusing
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: profile
+      app: focusing
   jwtRules:
   - issuer: https://fosps.gravitatehealth.eu/auth/realms/GravitateHealth
-    jwksUri: http://keycloak.default.svc.cluster.local:8080/auth/realms/GravitateHealth/protocol/openid-connect/certs
+    jwksUri: https://fosps.gravitatehealth.eu/auth/realms/GravitateHealth/protocol/openid-connect/certs
 ---
+# auth ips-fhir
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
-metadata: 
-  name: require-jwt-default-namespace
+metadata:
+  name: authz-focusing
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: profile
+      app: focusing
   rules:
-  - from:
-    - source:
-        requestPrincipals: ["*"]
+    to:
+      - operation:
+          methods: ["GET"]
+          paths: ["/focusing/preprocessing", "/focusing/lenses"]
+    to:
+      - operation:
+          methods: ["POST"]
+          paths: ["/focusing/preprocessing/"]
+    - from:
+        - source:
+            requestPrincipals: ["*"]
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/focusing/focus/"]

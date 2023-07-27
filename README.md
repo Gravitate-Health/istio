@@ -60,7 +60,7 @@ kubectl label namespace default istio-injection=enabled
 3. Set up the gateway. We have two options, depending on wheter we have a DNS name or not. For only IP access use [this file](./fosps-enviroment/002_gh-gateway-ip.yaml). For this example we will use the one [with domain name and certificate](./fosps-enviroment/002_gh-gateway.yaml):
 
 ```bash
-istioctl apply -f ./fosps-enviroment/002_gh-gateway.yaml
+kubectl apply -f ./fosps-enviroment/002_gh-gateway.yaml
 ```
 
 Istio should be installed and working as of this point. You can check everything has deployed correctly running the following command:

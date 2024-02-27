@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: gh-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: fosps-url-cert
+    hosts:
+    - gravitate-health.lst.tfo.upm.es
+  - port:      
+      number: 80      
+      name: http      
+      protocol: HTTP    
+    hosts:    
+    - gravitate-health.lst.tfo.upm.es
+
+  - port:
+      number: 443
+      name: https-budibase
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: budibase-url-cert
+    hosts:
+    - budibase.gravitate-health.lst.tfo.upm.es

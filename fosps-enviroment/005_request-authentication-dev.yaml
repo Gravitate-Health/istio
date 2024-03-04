@@ -1,0 +1,15 @@
+---
+# Define authentication method:
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication # https://istio.io/latest/docs/reference/config/security/request_authentication/
+metadata:
+  name: requestauthentication-fosps
+spec:
+  selector:
+    matchLabels:
+      istioRequireAuthentication: "true"
+  jwtRules: # https://istio.io/latest/docs/reference/config/security/jwt/#JWTRule
+    - issuer: https://gravitate-health.lst.tfo.upm.es/auth/realms/GravitateHealth
+      jwksUri: https://gravitate-health.lst.tfo.upm.es/auth/realms/GravitateHealth/protocol/openid-connect/certs
+      forwardOriginalToken: true
+      #audiences: ["account", "test-auth-client", "mahabylifespace"]

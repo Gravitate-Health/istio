@@ -24,3 +24,4 @@ spec:
   jwtRules:
   - issuer: https://gravitate-health.lst.tfo.upm.es/auth/realms/GravitateHealth
     jwksUri: https://gravitate-health.lst.tfo.upm.es/auth/realms/GravitateHealth/protocol/openid-connect/certs
+    forwardOriginalToken: true

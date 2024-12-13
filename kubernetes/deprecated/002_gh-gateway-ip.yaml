@@ -1,4 +1,4 @@
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
   name: gh-gateway
@@ -10,5 +10,5 @@ spec:
       number: 80      
       name: http      
       protocol: HTTP    
-    hosts:    
-    - 85.215.199.205
+    hosts:
+    - 87.106.162.134

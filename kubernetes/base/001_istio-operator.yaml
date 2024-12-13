@@ -1,31 +1,31 @@
-apiVersion: install.istio.io/v1alpha1
+apiVersion: install.istio.io/v1
 kind: IstioOperator
 metadata:
   namespace: istio-system
-  name: demo-installation
+  name: prod-operator
 spec:
-  profile: demo
+  profile: default
   meshConfig:
-        accessLogFile: /dev/stdout
-        enableTracing: true
+    accessLogFile: /dev/stdout
+    enableTracing: true
   components:
     ingressGateways:
     - name: istio-ingressgateway
       enabled: true
-      k8s:
-        overlays:
-        - apiVersion: apps/v1
-          kind: Deployment
-          name: istio-ingressgateway
-          patches:
-          - path: kind
-            value: DaemonSet
-          - path: spec.strategy
-          - path: spec.updateStrategy
-            value:
-              rollingUpdate:
-                maxUnavailable: 50%
-              type: RollingUpdate
+      #k8s:
+      #  overlays:
+      #  - apiVersion: apps/v1
+      #    kind: Deployment
+      #    name: istio-ingressgateway
+      #    patches:
+      #    - path: kind
+      #      value: DaemonSet
+      #    - path: spec.strategy
+      #    - path: spec.updateStrategy
+      #      value:
+      #        rollingUpdate:
+      #          maxUnavailable: 50%
+      #        type: RollingUpdate
     egressGateways:
     - name: istio-egressgateway
       enabled: true

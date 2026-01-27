@@ -15,7 +15,10 @@ A production-ready Helm chart for deploying Istio service mesh with Gravitate He
 
 - Kubernetes 1.19+
 - Helm 3.8+
+- **istioctl CLI** (if installing Istio via this chart with `istio.install=true`)
 - (Optional) A DNS domain name if using TLS certificates
+
+> **Note on Istio Installation:** This chart uses the IstioOperator to install Istio when `istio.install=true`. This requires the `istioctl` CLI to be available. Alternatively, you can pre-install Istio separately and set `istio.install=false`.
 
 > **Note on cert-manager:** This chart includes cert-manager as a Helm dependency and will automatically install it when `certManager.install=true` (default). If you already have cert-manager installed in your cluster, set `certManager.install=false` to skip the installation.
 

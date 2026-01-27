@@ -1,0 +1,30 @@
+# Helm chart temporary files
+charts/*/charts/
+charts/*/Chart.lock
+*.tgz
+
+# Helm dependency charts (downloaded subcharts)
+charts/istio-gravitatehealth/charts/
+
+# Packaged charts
+*.tgz
+*-*.tgz
+
+# Chart lock files
+Chart.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*.orig

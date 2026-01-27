@@ -11,7 +11,10 @@ fullnameOverride: ""
 # Istio Configuration
 # ===================================================================
 istio:
-  # Install Istio using the operator (set to false if Istio is already installed)
+  # Install Istio using the IstioOperator (set to false if Istio is already installed)
+  # Note: This creates an IstioOperator resource. You'll need istioctl to process it:
+  #   kubectl apply -f <generated-operator.yaml>
+  # Or pre-install Istio with: istioctl install -f <operator-file>
   install: true
   
   # Istio namespace

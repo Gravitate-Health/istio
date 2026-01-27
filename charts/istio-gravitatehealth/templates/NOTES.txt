@@ -1,0 +1,145 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+==============================================================================
+Istio Configuration Summary
+==============================================================================
+
+Namespace:        {{ .Values.istio.namespace }}
+Profile:          {{ .Values.istio.profile }}
+Ingress Gateway:  {{ .Values.istio.components.ingressGateway.enabled }}
+Egress Gateway:   {{ .Values.istio.components.egressGateway.enabled }}
+
+==============================================================================
+cert-manager Configuration
+==============================================================================
+
+{{- if .Values.certManager.install }}
+cert-manager:     Installed (via Helm dependency)
+{{- else }}
+cert-manager:     Using existing installation
+{{- end }}
+{{- if .Values.certManager.enabled }}
+Certificates:     Enabled
+Issuer:           {{ .Values.certManager.clusterIssuer.name }}
+Challenge:        {{ .Values.certManager.clusterIssuer.challengeType }}
+{{- else }}
+Certificates:     Disabled
+{{- end }}
+
+==============================================================================
+Gateway Configuration
+==============================================================================
+
+{{- if .Values.gateway.enabled }}
+Gateway Enabled:  Yes
+{{- if .Values.gateway.useIP }}
+Access Mode:      IP-based (no DNS required)
+Hosts:            * (all)
+TLS:              Disabled (not available for IP-based access)
+{{- else }}
+Access Mode:      DNS-based
+Hosts:            {{ join ", " .Values.gateway.hosts }}
+TLS:              {{ if .Values.gateway.tls.enabled }}Enabled{{ else }}Disabled{{ end }}
+{{- if .Values.gateway.tls.enabled }}
+Certificate:      {{ .Values.gateway.tls.credentialName }}
+{{- end }}
+{{- end }}
+{{- else }}
+Gateway Enabled:  No
+{{- end }}
+
+==============================================================================
+Next Steps
+==============================================================================
+
+{{- if .Values.certManager.install }}
+
+1. Verify cert-manager installation:
+
+   kubectl get pods -n cert-manager
+
+   Wait for all cert-manager pods to be Ready (may take 1-2 minutes).
+
+2. Check Istio installation status:
+{{- else }}
+
+1. Check Istio installation status:
+{{- end }}
+
+   kubectl get pods -n {{ .Values.istio.namespace }}
+
+{{- if .Values.certManager.install }}
+3. Get the Ingress Gateway external IP:
+{{- else }}
+2. Get the Ingress Gateway external IP:
+{{- end }}
+
+   kubectl get svc istio-ingressgateway -n {{ .Values.istio.namespace }}
+
+   Wait for EXTERNAL-IP to be assigned (may take a few minutes).
+
+{{- if and .Values.gateway.enabled (not .Values.gateway.useIP) }}
+
+{{- if .Values.certManager.install }}
+4. Configure DNS:
+{{- else }}
+3. Configure DNS:
+{{- end }}
+
+   Point your DNS A record for {{ index .Values.gateway.hosts 0 }} to the EXTERNAL-IP above.
+
+{{- if and .Values.certManager.enabled .Values.certManager.certificate.enabled }}
+
+{{- if .Values.certManager.install }}
+5. Verify Let's Encrypt certificate:
+{{- else }}
+4. Verify Let's Encrypt certificate:
+{{- end }}
+
+   kubectl get certificate -n {{ .Values.certManager.namespace }}
+   kubectl describe certificate {{ .Values.certManager.certificate.name }} -n {{ .Values.certManager.namespace }}
+
+   It may take a few minutes for the certificate to be issued.
+{{- end }}
+{{- end }}
+
+{{- if .Values.certManager.install }}
+6. Enable Istio sidecar injection for your namespaces:
+{{- else }}
+5. Enable Istio sidecar injection for your namespaces:
+{{- end }}
+
+   kubectl label namespace <your-namespace> istio-injection=enabled
+
+   Or restart pods in namespaces already labeled.
+
+{{- if .Values.authentication.enabled }}
+
+6. JWT Authentication is enabled for pods with label:
+   {{ range $key, $value := .Values.authentication.selector }}
+   {{ $key }}: {{ $value }}
+   {{- end }}
+
+   Add this label to your deployments to enable authentication.
+{{- end }}
+
+==============================================================================
+Documentation
+==============================================================================
+
+For detailed configuration and troubleshooting:
+- Helm Chart README: https://github.com/Gravitate-Health/istio/tree/main/charts/istio-gravitatehealth
+- Istio Docs: https://istio.io/latest/docs/
+
+==============================================================================
+Support
+==============================================================================
+
+Issues: https://github.com/Gravitate-Health/istio/issues

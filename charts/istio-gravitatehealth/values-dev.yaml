@@ -1,0 +1,44 @@
+# Example values file for development environment
+# Use with: helm install istio-gh charts/istio-gravitatehealth -f charts/istio-gravitatehealth/values-dev.yaml
+
+# Override with development-specific settings
+gateway:
+  useIP: false
+  hosts:
+    - fosps.gravitatehealth.eu
+  tls:
+    enabled: true
+    credentialName: fosps-url-cert
+
+certManager:
+  enabled: true
+  clusterIssuer:
+    # Use staging server for development to avoid rate limits
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: gmejias@lst.tfo.upm.es
+
+authentication:
+  enabled: true
+  jwtRules:
+    - issuer: https://fosps.gravitatehealth.eu/auth/realms/GravitateHealth
+      jwksUri: https://fosps.gravitatehealth.eu/auth/realms/GravitateHealth/protocol/openid-connect/certs
+      forwardOriginalToken: true
+
+# Add development-specific virtual services
+virtualServices:
+  - enabled: true
+    name: budibase
+    namespace: budibase
+    hosts:
+      - "*"
+    gateways:
+      - gh-gateway
+    http:
+      - match:
+          - uri:
+              prefix: /
+        route:
+          - destination:
+              host: service-proxy.budibase.svc.cluster.local
+              port:
+                number: 10000

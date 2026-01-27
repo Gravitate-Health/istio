@@ -1,0 +1,42 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "istio-gravitatehealth.fullname" . }}-gateway
+  namespace: {{ .Values.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "istio-gravitatehealth.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  {{- if and .Values.gateway.tls.enabled (not .Values.gateway.useIP) }}
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: {{ .Values.gateway.tls.mode }}
+      credentialName: {{ .Values.gateway.tls.credentialName }}
+    hosts:
+    {{- range .Values.gateway.hosts }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    {{- if .Values.gateway.http.redirect }}
+    tls:
+      httpsRedirect: true
+    {{- end }}
+    hosts:
+    {{- if .Values.gateway.useIP }}
+    - "*"
+    {{- else }}
+    {{- range .Values.gateway.hosts }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,36 @@
+apiVersion: v2
+name: istio-gravitatehealth
+description: A Helm chart for deploying Istio service mesh with Gravitate Health configuration including gateway, authentication, and Let's Encrypt certificate management
+type: application
+version: 0.1.0
+appVersion: "1.20.2"
+keywords:
+  - istio
+  - service-mesh
+  - gateway
+  - authentication
+  - letsencrypt
+  - cert-manager
+home: https://github.com/Gravitate-Health/istio
+sources:
+  - https://github.com/Gravitate-Health/istio
+maintainers:
+  - name: Gravitate Health Team
+    email: gmejias@lst.tfo.upm.es
+dependencies:
+  - name: base
+    repository: https://istio-release.storage.googleapis.com/charts
+    version: 1.20.2
+    condition: istio.install
+  - name: istiod
+    repository: https://istio-release.storage.googleapis.com/charts
+    version: 1.20.2
+    condition: istio.install
+  - name: gateway
+    repository: https://istio-release.storage.googleapis.com/charts
+    version: 1.20.2
+    condition: istio.install
+  - name: cert-manager
+    repository: https://charts.jetstack.io
+    version: v1.14.2
+    condition: certManager.install

@@ -1,0 +1,9 @@
+{{- if .Values.istio.namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.istio.namespace }}
+  labels:
+    {{- include "istio-gravitatehealth.labels" . | nindent 4 }}
+    istio-injection: disabled
+{{- end }}

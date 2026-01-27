@@ -1,0 +1,20 @@
+name: Release Helm Chart
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - 'charts/**' # Only run if chart files change
+        tags:
+            - '*' # Run on any tag push
+
+jobs:  
+  release-chart:
+    name: Release Helm Chart
+    uses: Gravitate-Health/reusable-workflows/.github/workflows/helm-publish.yml@main
+    with:
+      chart_path: "charts/istio-gravitatehealth"
+    permissions:
+      contents: read
+      packages: write

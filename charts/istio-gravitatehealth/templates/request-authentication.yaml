@@ -1,0 +1,27 @@
+{{- if .Values.authentication.enabled }}
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: {{ include "istio-gravitatehealth.fullname" . }}-request-authentication
+  namespace: {{ .Values.authentication.namespace }}
+  labels:
+    {{- include "istio-gravitatehealth.labels" . | nindent 4 }}
+spec:
+  {{- with .Values.authentication.selector }}
+  selector:
+    matchLabels:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+  jwtRules:
+  {{- range .Values.authentication.jwtRules }}
+  - issuer: {{ .issuer }}
+    jwksUri: {{ .jwksUri }}
+    {{- if .forwardOriginalToken }}
+    forwardOriginalToken: {{ .forwardOriginalToken }}
+    {{- end }}
+    {{- with .audiences }}
+    audiences:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

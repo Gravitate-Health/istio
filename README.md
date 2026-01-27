@@ -25,7 +25,75 @@ This repository contains the files needed for the installation of Istio inside a
 
 ## Installation
 
-Refer to the [General FOSPS Deployment Documentation](https://github.com/Gravitate-Health/Documentation) to deploy this service.
+This repository provides two deployment methods:
+
+### 1. Deploy via Helm Chart (Recommended)
+
+The recommended way to deploy Istio for Gravitate Health is using the Helm chart, which provides a production-ready, configurable deployment.
+
+#### Deploy Directly from OCI Registry (No Clone Required)
+
+```bash
+# Login to GitHub Container Registry (if private)
+helm registry login ghcr.io -u <your-username>
+
+# Deploy with default configuration
+helm install istio-gh oci://ghcr.io/gravitate-health/charts/istio-gravitatehealth --version 0.1.0
+
+# Deploy with custom domain and email
+helm install istio-gh oci://ghcr.io/gravitate-health/charts/istio-gravitatehealth \
+  --version 0.1.0 \
+  --set gateway.hosts[0]=myapp.example.com \
+  --set certManager.clusterIssuer.email=admin@example.com
+
+# Deploy for IP-based access (no DNS)
+helm install istio-gh oci://ghcr.io/gravitate-health/charts/istio-gravitatehealth \
+  --version 0.1.0 \
+  --set gateway.useIP=true \
+  --set certManager.enabled=false
+```
+
+#### Deploy from Local Chart
+
+```bash
+# Clone the repository
+git clone https://github.com/Gravitate-Health/istio.git
+cd istio
+
+# Install the chart
+helm install istio-gh charts/istio-gravitatehealth
+
+# Or with custom values file
+helm install istio-gh charts/istio-gravitatehealth -f my-values.yaml
+
+```
+
+For detailed configuration options, see the [Helm Chart README](charts/istio-gravitatehealth/README.md).
+
+#### Upgrading
+
+```bash
+# Upgrade from OCI registry
+helm upgrade istio-gh oci://ghcr.io/gravitate-health/charts/istio-gravitatehealth --version 0.2.0
+
+# Upgrade with new values
+helm upgrade istio-gh oci://ghcr.io/gravitate-health/charts/istio-gravitatehealth \
+  --version 0.2.0 \
+  --set gateway.hosts[0]=newdomain.com \
+  --reuse-values
+```
+
+#### Uninstalling
+
+```bash
+helm uninstall istio-gh
+```
+
+### 2. Manual Deployment with kubectl (Legacy)
+
+For manual deployment or reference, see [istio-deployment.md](istio-deployment.md).
+
+Refer to the [General FOSPS Deployment Documentation](https://github.com/Gravitate-Health/Documentation) for complete deployment instructions.
 
 
 Known issues and limitations
@@ -70,6 +138,7 @@ Authors and history
 - Álvaro Belmar ([@abelmarm](https://github.com/abelmarm))
 - Guillermo Mejías ([@gmej](https://github.com/gmej))
 - Alejo Esteban ([@10alejospain](https://github.com/10alejospain))
+- Alejandro Medrao ([@amedranogil](https://github.com/amedranogil))
 
 Acknowledgments
 ---------------

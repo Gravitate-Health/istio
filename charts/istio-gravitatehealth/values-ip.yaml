@@ -1,0 +1,18 @@
+# Example values file for IP-based deployment (no DNS)
+# Use with: helm install istio-gh charts/istio-gravitatehealth -f charts/istio-gravitatehealth/values-ip.yaml
+
+gateway:
+  # Enable IP-based access
+  useIP: true
+  # TLS not available for IP-based access
+  tls:
+    enabled: false
+
+# Disable cert-manager since Let's Encrypt requires DNS
+certManager:
+  install: false   # Don't install cert-manager
+  enabled: false   # Don't create certificates
+
+# You may still want authentication
+authentication:
+  enabled: false  # Set to true if you have JWT authentication setup

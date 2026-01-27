@@ -1,0 +1,240 @@
+# Default values for istio-gravitatehealth.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Override the name of the chart
+nameOverride: ""
+# Override the full name of the chart
+fullnameOverride: ""
+
+# ===================================================================
+# Istio Configuration
+# ===================================================================
+istio:
+  # Install Istio using the operator (set to false if Istio is already installed)
+  install: true
+  
+  # Istio namespace
+  namespace: istio-system
+  
+  # Istio profile: default, demo, minimal, remote, empty, preview
+  # See: https://istio.io/latest/docs/setup/additional-setup/config-profiles/
+  profile: default
+  
+  # Mesh configuration
+  meshConfig:
+    # Enable access logging to stdout for better observability
+    accessLogFile: /dev/stdout
+    # Enable distributed tracing
+    enableTracing: true
+    # Additional mesh config can be added here
+    additionalConfig: {}
+  
+  # Istio components
+  components:
+    ingressGateway:
+      enabled: true
+      # Kubernetes-specific configuration for ingress gateway
+      # Uncomment and configure if you need DaemonSet mode or specific resources
+      k8s: {}
+        # overlays:
+        # - apiVersion: apps/v1
+        #   kind: Deployment
+        #   name: istio-ingressgateway
+        #   patches:
+        #   - path: kind
+        #     value: DaemonSet
+        # resources:
+        #   requests:
+        #     cpu: 100m
+        #     memory: 128Mi
+        #   limits:
+        #     cpu: 2000m
+        #     memory: 1024Mi
+    
+    egressGateway:
+      enabled: true
+      k8s: {}
+  
+  # Configure namespace labels for Istio injection
+  # Add namespaces that should have automatic sidecar injection
+  namespaceLabels:
+    - name: default
+      istioInjection: true
+      additionalLabels: {}
+    # - name: my-app-namespace
+    #   istioInjection: true
+    #   additionalLabels:
+    #     environment: production
+
+# ===================================================================
+# Gateway Configuration
+# ===================================================================
+gateway:
+  # Enable gateway creation
+  enabled: true
+  
+  # Gateway namespace (defaults to Release namespace if not specified)
+  namespace: ""
+  
+  # Use IP-based access instead of DNS
+  # Set to true if you don't have a DNS name and want to access via IP
+  # Note: Let's Encrypt certificates require DNS, so cert-manager will be disabled when useIP=true
+  useIP: false
+  
+  # Domain names for the gateway (ignored if useIP=true)
+  # These are the hostnames that will be routed through the Istio ingress
+  hosts:
+    - fosps.gravitatehealth.eu
+  
+  # TLS/HTTPS configuration (only used when useIP=false)
+  tls:
+    enabled: true
+    # TLS mode: SIMPLE, MUTUAL, PASSTHROUGH, ISTIO_MUTUAL
+    mode: SIMPLE
+    # Name of the secret containing the TLS certificate (created by cert-manager)
+    credentialName: fosps-url-cert
+  
+  # HTTP configuration
+  http:
+    # Redirect HTTP to HTTPS
+    redirect: false
+
+# ===================================================================
+# Cert-Manager / Let's Encrypt Configuration
+# ===================================================================
+# Note: Automatically disabled when gateway.useIP=true
+certManager:
+  # Install cert-manager as part of this chart (via Helm dependency)
+  # Set to false if cert-manager is already installed in your cluster
+  install: true
+  
+  # Enable cert-manager certificate issuance (ClusterIssuer and Certificate resources)
+  # You can disable certificate creation while keeping cert-manager installed
+  enabled: true
+  
+  # Cert-manager namespace
+  namespace: istio-system
+  
+  # Cluster Issuer configuration
+  clusterIssuer:
+    name: letsencrypt-cert
+    # Email for Let's Encrypt notifications
+    email: gmejias@lst.tfo.upm.es
+    # Let's Encrypt server
+    # Production: https://acme-v02.api.letsencrypt.org/directory
+    # Staging: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Secret to store the ACME account private key
+    privateKeySecretRef: letsencrypt-cert
+    # Challenge type: http01 or dns01
+    challengeType: http01
+    # Ingress class for HTTP-01 challenge
+    ingressClass: istio
+    # DNS-01 solver configuration (only used if challengeType=dns01)
+    dns01Solver: {}
+      # Example for Cloudflare:
+      # cloudflare:
+      #   email: your-email@example.com
+      #   apiTokenSecretRef:
+      #     name: cloudflare-api-token-secret
+      #     key: api-token
+  
+  # Certificate configuration
+  certificate:
+    enabled: true
+    name: fosps-url-cert
+    # Secret name where the certificate will be stored
+    secretName: fosps-url-cert
+    # Common name for the certificate
+    commonName: fosps.gravitatehealth.eu
+    # DNS names (SANs) for the certificate
+    dnsNames:
+      - fosps.gravitatehealth.eu
+    # Certificate duration (default: 90d for Let's Encrypt)
+    duration: ""  # e.g., "2160h" for 90 days
+    # Renew before expiration
+    renewBefore: ""  # e.g., "360h" for 15 days
+    # Private key configuration
+    privateKey: {}
+      # algorithm: RSA
+      # encoding: PKCS1
+      # size: 2048
+    # Certificate usages
+    usages: []
+      # - server auth
+      # - client auth
+
+# ===================================================================
+# Authentication Configuration (JWT/OIDC)
+# ===================================================================
+authentication:
+  # Enable request authentication
+  enabled: true
+  
+  # Namespace for the RequestAuthentication resource
+  namespace: default
+  
+  # Selector to apply authentication only to specific workloads
+  # Leave empty to apply to all workloads in the namespace
+  selector:
+    istioRequireAuthentication: "true"
+  
+  # JWT rules for authentication
+  jwtRules:
+    - issuer: https://fosps.gravitatehealth.eu/auth/realms/GravitateHealth
+      jwksUri: https://fosps.gravitatehealth.eu/auth/realms/GravitateHealth/protocol/openid-connect/certs
+      forwardOriginalToken: true
+      # audiences:
+      #   - my-api
+      #   - my-service
+
+# ===================================================================
+# Virtual Services Configuration
+# ===================================================================
+# Define VirtualServices for routing traffic to your applications
+# Each virtual service routes traffic from the gateway to backend services
+virtualServices:
+  # Example: Budibase application routing
+  - enabled: false
+    name: budibase
+    namespace: budibase
+    labels: {}
+    hosts:
+      - "*"
+    gateways:
+      - gh-gateway
+    http:
+      - match:
+          - uri:
+              prefix: /
+        route:
+          - destination:
+              host: service-proxy.budibase.svc.cluster.local
+              port:
+                number: 10000
+  
+  # Add more virtual services as needed
+  # - enabled: true
+  #   name: my-app
+  #   namespace: my-namespace
+  #   labels:
+  #     app: my-app
+  #   hosts:
+  #     - myapp.example.com
+  #   gateways:
+  #     - gh-gateway
+  #   http:
+  #     - match:
+  #         - uri:
+  #             prefix: /api
+  #       route:
+  #         - destination:
+  #             host: my-app-service.my-namespace.svc.cluster.local
+  #             port:
+  #               number: 8080
+
+# ===================================================================
+# Additional Resources
+# ===================================================================
+# You can add additional Istio resources here as needed

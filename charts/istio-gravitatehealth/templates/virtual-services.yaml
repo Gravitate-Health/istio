@@ -1,0 +1,26 @@
+{{- range .Values.virtualServices }}
+{{- if .enabled }}
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ .name }}
+  namespace: {{ .namespace }}
+  labels:
+    {{- include "istio-gravitatehealth.labels" $ | nindent 4 }}
+    {{- with .labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  hosts:
+    {{- range .hosts }}
+    - {{ . | quote }}
+    {{- end }}
+  gateways:
+    {{- range .gateways }}
+    - {{ . }}
+    {{- end }}
+  http:
+    {{- toYaml .http | nindent 4 }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,32 @@
+{{- if .Values.istio.install }}
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: {{ .Values.istio.namespace }}
+  name: {{ include "istio-gravitatehealth.operatorName" . }}
+  labels:
+    {{- include "istio-gravitatehealth.labels" . | nindent 4 }}
+spec:
+  profile: {{ .Values.istio.profile }}
+  meshConfig:
+    accessLogFile: {{ .Values.istio.meshConfig.accessLogFile }}
+    enableTracing: {{ .Values.istio.meshConfig.enableTracing }}
+    {{- with .Values.istio.meshConfig.additionalConfig }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  components:
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: {{ .Values.istio.components.ingressGateway.enabled }}
+      {{- with .Values.istio.components.ingressGateway.k8s }}
+      k8s:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: {{ .Values.istio.components.egressGateway.enabled }}
+      {{- with .Values.istio.components.egressGateway.k8s }}
+      k8s:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

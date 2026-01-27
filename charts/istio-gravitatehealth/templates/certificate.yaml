@@ -1,0 +1,33 @@
+{{- if and .Values.certManager.enabled .Values.certManager.certificate.enabled (not .Values.gateway.useIP) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.certManager.certificate.name }}
+  namespace: {{ .Values.certManager.namespace }}
+  labels:
+    {{- include "istio-gravitatehealth.labels" . | nindent 4 }}
+spec:
+  secretName: {{ .Values.certManager.certificate.secretName }}
+  issuerRef:
+    name: {{ .Values.certManager.clusterIssuer.name }}
+    kind: ClusterIssuer
+  commonName: {{ .Values.certManager.certificate.commonName }}
+  {{- with .Values.certManager.certificate.duration }}
+  duration: {{ . }}
+  {{- end }}
+  {{- with .Values.certManager.certificate.renewBefore }}
+  renewBefore: {{ . }}
+  {{- end }}
+  {{- with .Values.certManager.certificate.privateKey }}
+  privateKey:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.certManager.certificate.usages }}
+  usages:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  dnsNames:
+    {{- range .Values.certManager.certificate.dnsNames }}
+    - {{ . | quote }}
+    {{- end }}
+{{- end }}
